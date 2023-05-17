@@ -59,26 +59,10 @@ let notes = [
 
   app.post('/api/notes', (request, response) => 
   {  
-    const body = request.body
-
-    if (!body.content) 
-    {
-      return response.status(400).json(
+    Note.find({}).then(notes => 
       {
-        error: "content missing"
+        response.json(notes)
       })
-    }
-
-    const note =
-    {
-      content: body.content,
-      important: body.important || false,
-      id: generateId(),
-    }
-
-    notes = notes.concat(note)
-
-    response.json(note)
   })
 
   app.get('/api/notes/:id', (request, response) => 
@@ -104,6 +88,22 @@ let notes = [
   })
 
   app.use(unknownEndpoint)
+
+  const mongoose = require('mongoose')
+
+  // ÄLÄ KOSKAAN TALLETA SALASANOJA GitHubiin!
+  const url =
+  `mongodb+srv://Admin:Qwerty@training.wpdz4xf.mongodb.net/noteApp?retryWrites=true&w=majority`
+  
+  mongoose.set('strictQuery',false)
+  mongoose.connect(url)
+  
+  const noteSchema = new mongoose.Schema({
+    content: String,
+    important: Boolean,
+  })
+  
+  const Note = mongoose.model('Note', noteSchema)
 
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => 
